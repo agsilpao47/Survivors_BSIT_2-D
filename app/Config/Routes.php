@@ -21,5 +21,14 @@ $routes->post('users/update', 'Users::update');
 $routes->delete('users/delete/(:num)', 'Users::delete/$1');
 $routes->post('users/fetchRecords', 'Users::fetchRecords');
 
+// Users Favorite Game's routes
+
+$routes->get('/games', 'Games::index');
+$routes->post('games/save', 'Games::save');
+$routes->get('games/edit/(:segment)', 'Games::edit/$1');
+$routes->post('games/update', 'Games::update');
+$routes->delete('games/delete/(:num)', 'Games::delete/$1');
+$routes->post('games/fetchRecords', 'Games::fetchRecords');
+
 // Logs routes for admin
 $routes->get('/log', 'Logs::log');

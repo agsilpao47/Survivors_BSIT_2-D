@@ -1,0 +1,123 @@
+<?php
+
+namespace App\Controllers;
+
+use App\Models\GameModel;
+use CodeIgniter\Controller;
+use App\Models\LogModel;
+
+class Games extends Controller
+{
+    public function index(){
+        $model = new GameModel();
+        $data['games'] = $model->findAll();
+        return view('games/index', $data);
+    }
+
+    public function save(){
+        $name = $this->request->getPost('name');
+        $category = $this->request->getPost('category');
+        $userModel = new \App\Models\GameModel();
+        $logModel = new LogModel();
+
+        $data = [
+            'name'       => $name,
+            'category'   => $category,
+            'updated_at' => date('Y-m-d H:i:s'),
+            'deleted_at' => date('Y-m-d H:i:s')
+        ];
+
+        if ($userModel->insert($data)) {
+            $logModel->addLog('New User has been added: ' . $name, 'ADD');
+            return $this->response->setJSON(['status' => 'success']);
+        } else {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Failed to save category']);
+        }
+    }
+
+    public function update(){
+        $model = new GameModel();
+        $logModel = new LogModel();
+        $userId = $this->request->getPost('id');
+        $name = $this->request->getPost('name');
+        $category = $this->request->getPost('category');
+
+        $userData = [
+            'name'       => $name,
+            'category'   => $category,
+            'updated_at' => date('Y-m-d H:i:s'),
+            'deleted_at' => date('Y-m-d H:i:s')
+        ];
+        $updated = $model->update($userId, $userData);
+
+        if ($updated) {
+            $logModel->addLog('New Category has been updated: ' . $name, 'UPDATED');
+            return $this->response->setJSON([
+                'success' => true,
+                'message' => 'updated successfully.'
+            ]);
+        } else {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Error updating.'
+            ]);
+        }
+    }
+
+    public function edit($id){
+        $model = new GameModel();
+    $user = $model->find($id); // Fetch user by ID
+
+    if ($user) {
+        return $this->response->setJSON(['data' => $user]); // Return user data as JSON
+    } else {
+        return $this->response->setStatusCode(404)->setJSON(['error' => 'not found']);
+    }
+}
+
+public function delete($id){
+    $model = new GameModel();
+    $logModel = new LogModel();
+    $user = $model->find($id);
+    if (!$user) {
+        return $this->response->setJSON(['success' => false, 'message' => 'not found.']);
+    }
+
+    $deleted = $model->delete($id);
+
+    if ($deleted) {
+        $logModel->addLog('Delete user', 'DELETED');
+        return $this->response->setJSON(['success' => true, 'message' => 'deleted successfully.']);
+    } else {
+        return $this->response->setJSON(['success' => false, 'message' => 'Failed to delete.']);
+    }
+}
+
+public function fetchRecords()
+{
+    $request = service('request');
+    $model = new \App\Models\GameModel();
+
+    $start = $request->getPost('start') ?? 0;
+    $length = $request->getPost('length') ?? 10;
+    $searchValue = $request->getPost('search')['value'] ?? '';
+
+    $totalRecords = $model->countAll();
+    $result = $model->getRecords($start, $length, $searchValue);
+
+    $data = [];
+    $counter = $start + 1;
+    foreach ($result['data'] as $row) {
+        $row['row_number'] = $counter++;
+        $data[] = $row;
+    }
+
+    return $this->response->setJSON([
+        'draw' => intval($request->getPost('draw')),
+        'recordsTotal' => $totalRecords,
+        'recordsFiltered' => $result['filtered'],
+        'data' => $data,
+    ]);
+}
+
+}
