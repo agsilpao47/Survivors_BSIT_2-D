@@ -30,5 +30,14 @@ $routes->post('games/update', 'Games::update');
 $routes->delete('games/delete/(:num)', 'Games::delete/$1');
 $routes->post('games/fetchRecords', 'Games::fetchRecords');
 
+// Student routes
+
+$routes->get('/student', 'Student::index');
+$routes->post('student/save', 'Student::save');
+$routes->get('student/edit/(:segment)', 'Student::edit/$1');
+$routes->post('student/update', 'Student::update');
+$routes->delete('student/delete/(:num)', 'Student::delete/$1');
+$routes->post('student/fetchRecords', 'Student::fetchRecords');
+
 // Logs routes for admin
 $routes->get('/log', 'Logs::log');

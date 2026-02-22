@@ -105,6 +105,12 @@ body.dark-mode .main-sidebar .nav-link:hover {
         <p>Favorite Games</p>
       </a>
     </li>
+             <li class="nav-item">
+      <a href="<?= base_url('student') ?>" class="nav-link <?= is_active(1, 'student') ?>">
+        <i class="nav-icon 	fas fa-gamepad"></i>
+        <p>Student</p>
+      </a>
+    </li>
   </ul>
 </nav>
 </div>
