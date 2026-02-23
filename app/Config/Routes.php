@@ -47,6 +47,6 @@ $routes->get('books/show/(:num)', 'Books::show/$1');
 $routes->get('books/edit/(:num)', 'Books::edit/$1');
 $routes->post('books/update/(:num)', 'Books::update/$1');
 $routes->get('books/delete/(:num)', 'Books::delete/$1');
-
+$routes->post('books/fetchRecords', 'Books::fetchRecords');
 // Logs routes for admin
 $routes->get('/log', 'Logs::log');

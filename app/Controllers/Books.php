@@ -14,24 +14,55 @@ class Books extends BaseController
     }
 
     /**
-     * Display all books
+     * Display all books with DataTables
      */
     public function index()
     {
-        $data['books'] = $this->bookModel->orderBy('id', 'DESC')->findAll();
-        $data['title'] = 'Books List';
-        
-        return view('books/index', $data);
+        return view('books/index');
     }
 
     /**
-     * Show form to create new book
+     * Store new book
      */
-    public function create()
+    public function store()
     {
-        $data['title'] = 'Add New Book';
+        $validation = $this->validate([
+            'title' => 'required|max_length[20]',
+            'book_name' => 'required|max_length[100]',
+            'genre' => 'required|max_length[50]',
+            'date_publish' => 'required|integer|min_length[4]|max_length[4]'
+        ]);
+
+        if (!$validation) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Validation failed']);
+        }
+
+        $data = [
+            'title' => $this->request->getPost('title'),
+            'book_name' => $this->request->getPost('book_name'),
+            'genre' => $this->request->getPost('genre'),
+            'date_publish' => $this->request->getPost('date_publish')
+        ];
+
+        if ($this->bookModel->insert($data)) {
+            return $this->response->setJSON(['status' => 'success']);
+        } else {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Failed to save book']);
+        }
+    }
+
+    /**
+     * Get book data for editing
+     */
+    public function edit($id = null)
+    {
+        $book = $this->bookModel->find($id);
         
-        return view('books/create', $data);
+        if ($book) {
+            return $this->response->setJSON(['data' => $book]);
+        } else {
+            return $this->response->setStatusCode(404)->setJSON(['error' => 'Book not found']);
+        }
     }
 
 }

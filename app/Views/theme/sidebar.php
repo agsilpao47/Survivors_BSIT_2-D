@@ -111,6 +111,13 @@ body.dark-mode .main-sidebar .nav-link:hover {
         <p>Student</p>
       </a>
     </li>
+    <li class="nav-item">
+    <a href="<?= base_url('books') ?>" class="nav-link <?= is_active(1, 'books') ?>">
+        <i class="nav-icon fas fa-book"></i>
+        <p>Books</p>
+    </a>
+</li>
+
   </ul>
 </nav>
 </div>
