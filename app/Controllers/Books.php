@@ -101,4 +101,23 @@ class Books extends BaseController
             ]);
         }
     }
+      /**
+     * Delete book
+     */
+    public function delete($id = null)
+    {
+        $book = $this->bookModel->find($id);
+        
+        if (!$book) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Book not found.']);
+        }
+
+        $deleted = $this->bookModel->delete($id);
+
+        if ($deleted) {
+            return $this->response->setJSON(['success' => true, 'message' => 'Book deleted successfully.']);
+        } else {
+            return $this->response->setJSON(['success' => false, 'message' => 'Failed to delete book.']);
+        }
+    }
 }
