@@ -102,7 +102,7 @@ class Books extends BaseController
         }
     }
       /**
-     * Delete book
+     * Delete books
      */
     public function delete($id = null)
     {
