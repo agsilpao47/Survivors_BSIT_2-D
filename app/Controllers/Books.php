@@ -22,7 +22,7 @@ class Books extends BaseController
     }
 
     /**
-     * Store new book
+     * Store new book via AJAX
      */
     public function store()
     {
@@ -52,7 +52,7 @@ class Books extends BaseController
     }
 
     /**
-     * Get book data for editing
+     * Get book data for editing via AJAX
      */
     public function edit($id = null)
     {
@@ -64,8 +64,9 @@ class Books extends BaseController
             return $this->response->setStatusCode(404)->setJSON(['error' => 'Book not found']);
         }
     }
- /**
-     * Update book
+
+    /**
+     * Update book via AJAX
      */
     public function update($id = null)
     {
@@ -101,8 +102,9 @@ class Books extends BaseController
             ]);
         }
     }
-      /**
-     * Delete books
+
+    /**
+     * Delete book via AJAX
      */
     public function delete($id = null)
     {
@@ -119,5 +121,60 @@ class Books extends BaseController
         } else {
             return $this->response->setJSON(['success' => false, 'message' => 'Failed to delete book.']);
         }
+    }
+
+    /**
+     * Fetch records for DataTables
+     */
+    public function fetchRecords()
+    {
+        $request = service('request');
+        $model = $this->bookModel;
+
+        $start = $request->getPost('start') ?? 0;
+        $length = $request->getPost('length') ?? 10;
+        $searchValue = $request->getPost('search')['value'] ?? '';
+        $orderColumn = $request->getPost('order')[0]['column'] ?? 0;
+        $orderDirection = $request->getPost('order')[0]['dir'] ?? 'ASC';
+
+        // Get column name from DataTables column index
+        $columns = ['id', 'title', 'book_name', 'genre', 'date_publish'];
+        $orderBy = $columns[$orderColumn] ?? 'id';
+
+        // Get total records
+        $totalRecords = $model->countAll();
+
+        // Get filtered records
+        $builder = $model->builder();
+        
+        if (!empty($searchValue)) {
+            $builder->groupStart();
+            $builder->like('title', $searchValue);
+            $builder->orLike('book_name', $searchValue);
+            $builder->orLike('genre', $searchValue);
+            $builder->groupEnd();
+        }
+
+        $recordsFiltered = $builder->countAllResults(false);
+        
+        // Get paginated results
+        $result = $builder->orderBy($orderBy, $orderDirection)
+                        ->limit($length, $start)
+                        ->get()
+                        ->getResultArray();
+
+        $data = [];
+        $counter = $start + 1;
+        foreach ($result as $row) {
+            $row['row_number'] = $counter++;
+            $data[] = $row;
+        }
+
+        return $this->response->setJSON([
+            'draw' => intval($request->getPost('draw')),
+            'recordsTotal' => $totalRecords,
+            'recordsFiltered' => $recordsFiltered,
+            'data' => $data,
+        ]);
     }
 }
